@@ -1,5 +1,4 @@
 import asyncio
-import os
 from contextlib import AsyncExitStack
 from functools import partial
 from typing import Optional
@@ -10,8 +9,6 @@ from chatlas._tools import Tool
 from chatlas._turn import Turn
 from mcp import ClientSession
 from mcp.client.sse import sse_client
-
-os.environ["OPENAI_API_KEY"] = "abc123"  # needed due to bug in chatlas
 
 
 class MCPClient:
