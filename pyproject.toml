@@ -18,3 +18,105 @@ dependencies = [
 
 [tool.uv.sources]
 chatlas = { git = "https://github.com/posit-dev/chatlas" }
+
+[dependency-groups]
+lint = ["ruff>=0.8.4", "pyright>=1.1.391"]
+test = [
+    "rsconnect-python>=1.25.1",
+    # "responses>=0.25.3",
+    "pytest>=8.3.4",
+    # "pyjson5>=1.6.7",
+]
+# Default install group by `uv`: `dev`
+dev = [{ include-group = "lint" }, { include-group = "test" }]
+
+
+# [tool.uv.sources]
+# chatlas = { git = "https://github.com/posit-dev/chatlas" }
+
+
+[tool.ruff]
+line-length = 99
+
+[tool.ruff.format]
+docstring-code-format = true
+docstring-code-line-length = "dynamic"
+
+[tool.ruff.lint]
+extend-select = [
+    # "C90", # Many false positives # C90; mccabe: https://docs.astral.sh/ruff/rules/complex-structure/
+    # "DTZ", # Dates with timezones are different from dates without timezones # DTZ; flake8-datetimez: https://docs.astral.sh/ruff/rules/#flake8-datetimez-dtz
+
+    # flake8-builtins
+    # https://docs.astral.sh/ruff/rules/#flake8-builtins-a
+    #
+    # Check for builtin shadowing (i.e., naming a variable 'for', which is a builtin.)
+    "A",
+
+    # pydocstyle
+    # https://docs.astral.sh/ruff/rules/#pydocstyle-d
+    # https://docs.astral.sh/ruff/faq/#does-ruff-support-numpy-or-google-style-docstrings
+    #
+    # Check docstring formatting. Many of these rules are intentionally ignored below.
+    "D",
+
+    "ARG",    # ARG; flake8-argparse: https://docs.astral.sh/ruff/rules/#flake8-unused-arguments-arg
+    "E",      # E; pycodestyle: https://docs.astral.sh/ruff/rules/#pycodestyle-e-w
+    "F",      # F; Pyflakes: https://docs.astral.sh/ruff/rules/#pyflakes-f
+    "I",      # I; isort: https://docs.astral.sh/ruff/rules/#isort-i
+    "B",      # B; flake8-bugbear: https://docs.astral.sh/ruff/rules/#flake8-bugbear-b
+    "Q",      # Q; flake8-quotes: https://docs.astral.sh/ruff/rules/#flake8-quotes-q
+    "COM",    # COM; Commas: https://docs.astral.sh/ruff/rules/#flake8-commas-com
+    "C4",     # C4; flake8-comprehensions: https://docs.astral.sh/ruff/rules/#flake8-comprehensions-c4
+    "FA102",  # FA102; flake8-future-annotations: https://docs.astral.sh/ruff/rules/#flake8-future-annotations-fa
+    "ISC",    # ISC; flake8-implicit-str-concat: https://docs.astral.sh/ruff/rules/#flake8-implicit-str-concat-isc
+    "ICN",    # ICN; flake8-import-conventions: https://docs.astral.sh/ruff/rules/#flake8-import-conventions-icn
+    "PIE",    # PIE; flake8-pie: https://docs.astral.sh/ruff/rules/#flake8-pie-pie
+    "PYI013", # PYI013; flake8-pyi Non-empty class body must not contain `...`: https://docs.astral.sh/ruff/rules/#flake8-pyi-pyi
+    "PYI030", # PYI030; flake8-pyi Multiple literal members in a union: https://docs.astral.sh/ruff/rules/#flake8-pyi-pyi
+    "PYI034", # PYI034; flake8-pyi `__new__` methods usually reutrn `Self`: https://docs.astral.sh/ruff/rules/#flake8-pyi-pyi
+    "PT",     # PT; flake8-pytest-style: https://docs.astral.sh/ruff/rules/#flake8-pytest-style-pt
+    "SIM118", # SIM118; flake8-simplify Use `key {operator} dict`: https://docs.astral.sh/ruff/rules/#flake8-simplify-sim
+    "TCH",    # TCH; flake8-type-checking: https://docs.astral.sh/ruff/rules/#flake8-type-checking-tch
+    # "FIX", # FIX; flake8-fixme: https://docs.astral.sh/ruff/rules/#flake8-fixme-fix
+    # "PGH", # PGH; pygrep-hooks: https://docs.astral.sh/ruff/rules/#pygrep-hooks-pgh
+    "NPY",    # NPY; NumPy-specific rules: https://docs.astral.sh/ruff/rules/#numpy-specific-rules-npy
+    "RUF005", # RUF005; Ruff specific rules Consider {expression} instead of concatenation: https://docs.astral.sh/ruff/rules/#ruff-specific-rules-ruf
+    "RUF100", # RUF100; Ruff specific rules Unused `noqa` directive https://docs.astral.sh/ruff/rules/#ruff-specific-rules-ruf
+]
+ignore = [
+    # NumPy style docstring convention with noted exceptions.
+    # https://docs.astral.sh/ruff/faq/#does-ruff-support-numpy-or-google-style-docstrings
+    #
+    # This docstring style works with [quartodoc](https://machow.github.io/quartodoc/get-started/overview.html).
+    #
+    'D101', # TODO(#135) implement docstring for public class
+    'D103', # TODO(#135) implement docstring for public functions
+    'D104', # TODO(#135) implement docstring for public package
+    'D105', # TODO(#135) implement docstring for magic methods
+    'D100', # TODO(#135) implement docstring for public modules
+    'D102', # TODO(#135) implement docstring for public methods
+    'D401', # TODO(#135) fix imperative mood warnings
+
+    'D418', # D418 contradicts the overload convention used in this project to describe different endpoints across Connect versions.
+
+    "E501",   # Line too long
+    "PT011",  # `pytest.raises(ValueError)` is too broad
+    "PT022",  # No teardown in fixture
+    "F841",   # Local variable is assigned but never used
+    "COM812", # missing-trailing-comma
+    "ISC001", # single-line-implicit-string-concatenation
+    "ISC002", # multi-line-implicit-string-concatenation
+]
+
+
+[tool.ruff.lint.pydocstyle]
+convention = "numpy"
+
+# # Ruff is enabled in config file to run on save
+# Disable isort due to timing conflict with ruff
+[tool.isort]
+skip_glob = "**"
+# Disable local black to avoid conflict with ruff
+[tool.black]
+exclude = ".*"
