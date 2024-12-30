@@ -6,7 +6,8 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "anthropic[bedrock]>=0.42.0",
-    "chatlas>=0.2.0",
+    # "chatlas>=0.3.1",
+    "chatlas@git+https://github.com/posit-dev/chatlas@main",
     "jsonref>=1.1.0",
     "mcp>=1.1.2",
     "openai>=1.58.0",
@@ -16,8 +17,6 @@ dependencies = [
     "uvicorn>=0.34.0",
 ]
 
-[tool.uv.sources]
-chatlas = { git = "https://github.com/posit-dev/chatlas" }
 
 [dependency-groups]
 lint = ["ruff>=0.8.4", "pyright>=1.1.391"]
