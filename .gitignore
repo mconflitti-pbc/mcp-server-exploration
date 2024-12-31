@@ -4,3 +4,4 @@ __pycache__/
 .venv
 *.egg-info
 /swagger*.yaml
+/output.md
