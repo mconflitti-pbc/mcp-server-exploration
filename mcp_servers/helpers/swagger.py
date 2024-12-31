@@ -159,10 +159,6 @@ def expand_and_save_yaml(input_yaml_path, output_yaml_path):
         yaml.dump(document, file, default_flow_style=False, sort_keys=False)
 
 
-if __name__ == "__main__":
-    expand_and_save_yaml("~/Downloads/swagger.yaml", "~/Downloads/swagger-deref.yaml")
-
-
 def transform_swagger_to_operation_dict(swagger_dict):
     """
     Swagger to operation dictionary transformation.
@@ -195,3 +191,7 @@ def transform_swagger_to_operation_dict(swagger_dict):
                     }
 
     return operation_dict
+
+
+if __name__ == "__main__":
+    expand_and_save_yaml("swagger.yaml", "swagger-deref.yaml")

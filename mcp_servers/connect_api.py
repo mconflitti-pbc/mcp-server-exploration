@@ -16,11 +16,19 @@ from mcp_servers.helpers.swagger import (
 
 CONNECT_SERVER = os.environ.get("CONNECT_SERVER", "http://localhost:3939")
 CONNECT_API_KEY = os.environ.get("CONNECT_API_KEY", "")
+SWAGGER_FILE = os.environ.get("SWAGGER_FILE") or "swagger.yaml"
+
+if not os.path.exists(SWAGGER_FILE):
+    raise FileNotFoundError(
+        f"Swagger file not found at `{SWAGGER_FILE}`. "
+        "Please specify the path to the file using the SWAGGER_FILE= environment variable."
+    )
 
 server = Server("connect-api-server")
 sse = SseServerTransport("/messages")
 
-with open("/Users/mconflitti/Downloads/swagger.yaml", "r", encoding="utf-8") as file:
+
+with open(SWAGGER_FILE, "r", encoding="utf-8") as file:
     document = yaml.safe_load(file)
 
 document = expand_swagger(document)
