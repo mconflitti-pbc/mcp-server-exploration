@@ -6,6 +6,11 @@ include vars.mk
 
 all: dev lint
 
+client: dev
+	$(UV) run python app.py
+server: dev
+	$(UV) run python -m mcp_servers.connect_api
+
 clean:
 	rm -rf .pytest_cache .ruff_cache *.egg-info
 	find . -name "*.egg-info" -exec rm -rf {} +

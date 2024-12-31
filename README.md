@@ -1,9 +1,19 @@
 # MCP
 
-Be sure to activate `.venv`
+A simple example of a client and server using the Connect API.
 
-Run an MCP server like this: `CONNECT_API_KEY="<your key>" python -m mcp_servers.connect_api`
+## Usage
 
-Then run the MCP client: `python app.py`
+Run an MCP server:
 
-Modify the chat in the main function of `app.py`.
+```bash
+CONNECT_API_KEY="<your key>" SWAGGER_FILE="swagger.yaml" make server
+```
+
+Then run the MCP client:
+
+```bash
+make client
+```
+
+Modify the chat in the main function of `app.py` to ask different questions.

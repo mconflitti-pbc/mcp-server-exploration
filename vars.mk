@@ -20,3 +20,5 @@ UV ?= uv
 VIRTUAL_ENV ?= .venv
 
 UV_LOCK := uv.lock
+
+# SWAGGER_FILE :=
