@@ -1,6 +1,10 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
 [project]
-name = "test-shiny-app"
-version = "0.1.0"
+name = "openapi-mcp"
+dynamic = ["version"]
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.12"
@@ -13,13 +17,27 @@ dependencies = [
     "mcp>=1.1.2",
     "openai>=1.58.0",
     "pyyaml>=6.0.2",
-    "shiny>=1.2.1",
-    "starlette>=0.42.0",
+    # "starlette>=0.42.0",
+    "starlette>=0.40.0,<0.42.0",
     "uvicorn>=0.34.0",
 ]
 
+[tool.setuptools]
+include-package-data = true
+zip-safe = false
+
+[tool.setuptools.dynamic]
+version = { attr = "openapi_mcp.__version__" }
+[tool.setuptools.package-data]
+htmltools = ["py.typed"]
 
 [dependency-groups]
+ex-fastapi = ["fastapi==0.115.6"]
+ex-shiny = [
+    # "shiny>=1.2.1",
+    "shiny@git+https://github.com/posit-dev/shiny@chat_normalize_anthropic",
+    "requests>=1.2.1",
+]
 lint = ["ruff>=0.8.4", "pyright>=1.1.391"]
 test = [
     "rsconnect-python>=1.25.1",
@@ -28,7 +46,12 @@ test = [
     # "pyjson5>=1.6.7",
 ]
 # Default install group by `uv`: `dev`
-dev = [{ include-group = "lint" }, { include-group = "test" }]
+dev = [
+    { include-group = "lint" },
+    { include-group = "test" },
+    { include-group = "ex-fastapi" },
+    { include-group = "ex-shiny" },
+]
 
 
 # [tool.uv.sources]
