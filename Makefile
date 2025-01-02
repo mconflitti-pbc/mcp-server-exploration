@@ -47,6 +47,11 @@ test: dev
 	exit 1
 	$(UV) run --source=src -m pytest tests
 
+ex-api: dev
+	$(UV) run --group ex-fastapi uvicorn ex_api.main:app --reload
+shiny: dev
+	$(UV) run --group ex-fastapi python -m shiny run --port 56025 --reload --autoreload-port 56026 shiny/app.py
+
 help:
 	@echo "Makefile Targets"
 	@echo "  all            Run dev and lint"
