@@ -10,9 +10,12 @@ from starlette.applications import Starlette
 from starlette.routing import Route
 
 from mcp_servers.helpers.swagger import (
+    OperationDef,
     expand_swagger,
     transform_swagger_to_operation_dict,
 )
+
+SupportedOperations = dict[str, OperationDef]
 
 CONNECT_SERVER = os.environ.get("CONNECT_SERVER", "http://localhost:3939")
 CONNECT_API_KEY = os.environ.get("CONNECT_API_KEY", "")
@@ -34,7 +37,9 @@ with open(SWAGGER_FILE, "r", encoding="utf-8") as file:
 document = expand_swagger(document)
 operations = transform_swagger_to_operation_dict(document)
 
-SUPPORTED_OPERATIONS = {
+
+SUPPORTED_OPERATIONS: SupportedOperations = {
+    # "listHosts": operations["listHosts"],
     "getCurrentUser": operations["getCurrentUser"],
     "updateUser": operations["updateUser"],
     "getContents": operations["getContents"],
@@ -62,6 +67,21 @@ def map_swagger_params_to_input_schema(params):
         if "required" in param and param["required"]:
             schema["required"].append(param["name"])
     return schema
+
+
+def map_operations_to_tools(operations: SupportedOperations):
+    return [
+        types.Tool(
+            name=operation["name"],
+            description=operation["definition"][
+                "description"
+            ],  # + f" Possible responses: {operation['definition']['responses']}",
+            inputSchema=map_swagger_params_to_input_schema(
+                operation["definition"].get("parameters", [])
+            ),
+        )
+        for operation in operations.values()
+    ]
 
 
 def map_arguments_to_api_params(arguments, swagger_params):
@@ -185,9 +205,9 @@ async def make_request(operation, api_params):
     # Construct the full URL
     base_url = urllib.parse.urljoin(CONNECT_SERVER, "__api__")
 
-    print(base_url, route)
-    print(query_params)
-    print(body_params)
+    # print(base_url, route)
+    # print(query_params)
+    # print(body_params)
 
     # Make the request
     async with httpx.AsyncClient(verify=False, base_url=base_url) as client:
@@ -199,6 +219,45 @@ async def make_request(operation, api_params):
             json=body_params,
         )
         return response.text
+
+
+async def handle_operation(operations: SupportedOperations, name: str, arguments: dict | None):
+    """
+    Handle tool execution requests.
+
+    Arguments
+    ---------
+    operations
+        A dictionary of supported operations.
+    name
+        The name of the operation to execute.
+    arguments
+        The arguments to pass to the operation.
+
+    Returns
+    -------
+    :
+        A list containing a single text content object.
+    """
+    if name not in operations:
+        return [
+            types.TextContent(
+                text=f"Operation '{name}' is not supported.",
+                contentType="text/plain",
+            )
+        ]
+
+    print(f"Calling {name} with args: {arguments}")
+    operation = operations[name]
+    api_params = map_arguments_to_api_params(
+        arguments,
+        operation["definition"].get("parameters", []),
+    )
+
+    result = await make_request(operation, api_params)
+    print("Received Result")
+    # print("Received Result: {result}")
+    return [types.TextContent(text=result, contentType="text/plain")]
 
 
 @server.list_tools()
@@ -213,24 +272,12 @@ async def handle_list_tools() -> list[types.Tool]:
     :
         A list of tool objects.
     """
-    return [
-        types.Tool(
-            name=operation["name"],
-            description=operation["definition"][
-                "description"
-            ],  # + f" Possible responses: {operation['definition']['responses']}",
-            inputSchema=map_swagger_params_to_input_schema(
-                operation["definition"].get("parameters", [])
-            ),
-        )
-        for operation in SUPPORTED_OPERATIONS.values()
-    ]
+    return map_operations_to_tools(SUPPORTED_OPERATIONS)
 
 
 @server.call_tool()
 async def handle_call_tool(
-    name: str,
-    arguments: dict | None,
+    name: str, arguments: dict | None
 ) -> list[types.TextContent | types.ImageContent | types.EmbeddedResource]:
     """
     Handle tool execution requests.
@@ -239,24 +286,7 @@ async def handle_call_tool(
     -------
         A list containing a single text content object.
     """
-    if name not in SUPPORTED_OPERATIONS:
-        raise ValueError("Tool name not found")
-
-    print(f"Calling {name} with args: {arguments}")
-    operation = SUPPORTED_OPERATIONS[name]
-
-    api_params = map_arguments_to_api_params(
-        arguments, operation["definition"].get("parameters", [])
-    )
-    result = await make_request(operation, api_params)
-
-    print(f"Result: {result}")
-    return [
-        types.TextContent(
-            type="text",
-            text=result,
-        )
-    ]
+    return await handle_operation(SUPPORTED_OPERATIONS, name, arguments)
 
 
 # Needed to allow starlette to process handlers
