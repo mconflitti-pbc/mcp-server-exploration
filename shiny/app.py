@@ -5,29 +5,39 @@
 # as well as https://github.com/anthropics/anthropic-sdk-python#aws-bedrock
 # ------------------------------------------------------------------------------------
 import os
+from typing import Any
 
-import anthropic
-
-# import chatlas
+import chatlas
 import htmltools
+import mcp.types as mcp_types
 import requests
+from typing_extensions import TYPE_CHECKING
 
+# import anthropic
 # from anthropic import AnthropicBedrock
-from mcp_servers.helpers.swagger import expand_swagger, transform_swagger_to_operation_dict
-from openapi_mcp.connect_api import map_operations_to_tools
+from mcp_servers.helpers.swagger import (
+    OperationDef,
+    expand_swagger,
+    transform_swagger_to_operation_dict,
+)
+from openapi_mcp.connect_api import (
+    handle_operation,
+    make_request,
+    map_arguments_to_api_params,
+    map_operations_to_tools,
+)
 from shiny import reactive, req
 from shiny import ui as core_ui
 from shiny.express import input, render, ui
 
+if TYPE_CHECKING:
+    from openai.types.chat import ChatCompletionToolParam
 STREAM_CHAT = True
 
 
 aws_model = os.getenv("AWS_MODEL", "us.anthropic.claude-3-5-sonnet-20241022-v2:0")
 aws_region = os.getenv("AWS_REGION", "us-east-1")
-# chat = chatlas.ChatBedrockAnthropic(
-#     model=aws_model,
-#     aws_region=aws_region,
-# )
+chat = chatlas.ChatBedrockAnthropic(model=aws_model, aws_region=aws_region)
 
 # Set some Shiny page options
 ui.page_opts(
@@ -39,44 +49,66 @@ ui.page_opts(
 chat_ui = ui.Chat(id="chat")
 
 
-# @chat_ui.on_user_submit
-# async def _():
-#     user_input = chat_ui.user_input()
-#     if user_input is None:
-#         return
-#     if STREAM_CHAT:
-#         await chat_ui.append_message_stream(chat.stream(user_input))
-#     else:
-#         await chat_ui.append_message(str(chat.chat(user_input)))
-
-
-llm = anthropic.AnthropicBedrock(
-    # aws_secret_key=os.getenv("AWS_SECRET_KEY"),
-    # aws_access_key=os.getenv("AWS_ACCESS_KEY"),
-    aws_region=aws_region,
-    # aws_account_id=os.getenv("AWS_ACCOUNT_ID"),
-)
-
-
 @chat_ui.on_user_submit
 async def _():
-    # Get messages currently in the chat
-    messages = chat_ui.messages(format="anthropic")
-    # Create a response message stream
-    # print("anthropic_tools()", anthropic_tools())
-    response = llm.messages.create(
-        model=aws_model,
-        messages=messages,
-        stream=STREAM_CHAT,
-        max_tokens=1000,
-        tools=anthropic_tools(),
-    )
+    user_input = chat_ui.user_input()
+
+    print("Tools:", chat._tools)
+    print("STREAM_CHAT:", STREAM_CHAT)
+
+    if user_input is None:
+        return
     if STREAM_CHAT:
-        # Append the response stream into the chat
-        await chat_ui.append_message_stream(response)
+        await chat_ui.append_message_stream(await chat.stream_async(user_input, echo="all"))
     else:
-        # Append the response as a single message
-        await chat_ui.append_message(response)
+        await chat_ui.append_message(str(chat.chat(user_input)))
+
+
+# llm = anthropic.AnthropicBedrock(
+#     # aws_secret_key=os.getenv("AWS_SECRET_KEY"),
+#     # aws_access_key=os.getenv("AWS_ACCESS_KEY"),
+#     aws_region=aws_region,
+#     # aws_account_id=os.getenv("AWS_ACCOUNT_ID"),
+# )
+
+# def make_func(operation) -> Callable:
+
+#     class SimpleObject:
+#         ...
+#     class ComplicatedObject:
+#         inner: SimpleObject
+#         ...
+
+
+#     def ret_fn(...) -> ComplicatedObject:
+#         handle_operation(SUPPORTED_OPERATIONS, name, arguments)
+
+#     ret_fn.__doc__ = operation["description"]
+#     return {fn: ret_fn, classes: [SimpleObject, ComplicatedObject]}
+
+
+# @chat_ui.on_user_submit
+# async def _():
+#     # Get messages currently in the chat
+#     messages = chat_ui.messages(format="anthropic")
+#     # Create a response message stream
+#     # print("anthropic_tools()", anthropic_tools())
+#     response = llm.messages.create(
+#         model=aws_model,
+#         messages=messages,
+#         stream=STREAM_CHAT,
+#         max_tokens=1000,
+#         tools=anthropic_tools(),
+#     )
+
+#     llm.messages.
+
+#     if STREAM_CHAT:
+#         # Append the response stream into the chat
+#         await chat_ui.append_message_stream(response)
+#     else:
+#         # Append the response as a single message
+#         await chat_ui.append_message(response)
 
 
 # class ToolParam(TypedDict, total=False):
@@ -115,6 +147,115 @@ def anthropic_tools():
         }
         for tool in openapi_tools()
     ]
+
+
+class RawChatlasTool(chatlas.Tool):
+    @staticmethod
+    def reset_tools(chat: chatlas.Chat):
+        chat._tools = {}
+        return
+
+    @staticmethod
+    def register_tool(chat: chatlas.Chat, tool: "RawChatlasTool"):
+        chat._tools[tool.name] = tool
+        return
+
+    def __init__(self, *, base_url: str, operation: OperationDef):
+        operation_name = operation["name"]
+
+        operation_description = operation["definition"]["description"]
+        tool = map_operations_to_tools({operation_name: operation})[0]
+        operation_input_schema = tool.inputSchema
+
+        async def call_api(**kwargs: Any):
+            print("\n\nCalling tool", self.name, "with args:", kwargs)
+            # handle_operation({self.name: }, self.name, kwargs)
+
+            # print(f"Calling {name} with args: {arguments}")
+            # operation = operations[name]
+            api_params = map_arguments_to_api_params(
+                kwargs,
+                operation["definition"].get("parameters", []),
+            )
+
+            print("Calling operation: ", operation, api_params)
+            result = await make_request(base_url, operation, api_params)
+            # print("Received Result")
+            print("Received Result: `{result}`")
+            return [mcp_types.TextContent(text=result, type="text")]
+            return "hello barret!"
+
+        super().__init__(call_api, model=None)
+
+        # Now override the name, description, and input_schema
+        self.name = operation_name
+        self.description = operation_description
+        self.schema: ChatCompletionToolParam = {
+            "type": "function",
+            "function": {
+                "name": operation_name,
+                "description": operation_description,
+                "parameters": operation_input_schema,
+            },
+        }
+        # RawChatlasTool class variables
+        self._operation = operation
+        self._tool = tool
+
+
+@reactive.effect
+def _():
+    api_operations = openapi_operations()
+    if not api_operations:
+        req(api_operations)
+        return
+    print("Registering operations!", [operation["name"] for operation in api_operations.values()])
+    print(api_operations)
+
+    # _ = [
+    #     {
+    #         "input_schema": {"type": "object", "properties": {}, "required": []},
+    #         "name": "read_root__get",
+    #         "description": "Root endpoint returning a simple message.",
+    #     },
+    #     {
+    #         "input_schema": {
+    #             "type": "object",
+    #             "properties": {
+    #                 "item_id": {"type": "integer", "description": "(No description provided)"},
+    #                 "query_param": {"type": "string", "description": "(No description provided)"},
+    #             },
+    #             "required": ["item_id"],
+    #         },
+    #         "name": "read_item_items__item_id__get",
+    #         "description": "Endpoint to retrieve item details.",
+    #     },
+    # ]
+
+    # input_schema = {
+    #     "type": "function",
+    #     "function": {
+    #         "name": tool["name"],
+    #         "description": tool["description"],
+    #         "parameters": tool["input_schema"],
+    #     },
+    # }
+
+    api_url = openapi_url.get()
+
+    RawChatlasTool.reset_tools(chat)
+    for operation in api_operations.values():
+        print("operation", operation)
+        RawChatlasTool.register_tool(
+            chat,
+            RawChatlasTool(
+                # fn=fn,
+                base_url=api_url,
+                operation=operation,
+            ),
+        )
+
+    print("Tools registered!", chat._tools)
 
 
 # @reactive.effect
@@ -243,6 +384,16 @@ def openapi_operations():
 @reactive.calc
 def openapi_tools():
     return map_operations_to_tools(openapi_operations())
+
+
+@reactive.calc
+def chat_tools():
+    api_tools = openapi_tools()
+    if not api_tools:
+        req(api_tools)
+        return
+
+    ret_tools: RawChatlasTool = []
 
 
 # @reactive.effect
