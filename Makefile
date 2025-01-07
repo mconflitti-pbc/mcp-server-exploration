@@ -2,7 +2,7 @@ include vars.mk
 
 .DEFAULT_GOAL := all
 
-.PHONY: clean default dev ensure-uv fmt lint test help
+.PHONY: clean default dev ensure-uv fmt lint test help shiny ex-api
 
 all: dev lint
 
