@@ -1,6 +1,6 @@
 from contextlib import AsyncExitStack
 from functools import partial
-from typing import Optional
+from typing import Any, Optional
 
 from chatlas import Chat
 from chatlas._content import ContentToolRequest, ContentToolResult
@@ -39,11 +39,16 @@ class MCPClient:
         tools = response.tools
         print("\nConnected to server with tools:", [tool.name for tool in tools])
 
-        def register_mcp_tool(self, mcp_tool):
-            def x():
-                pass
+        self_session = self.session
 
-            tool = Tool(x)
+        def register_mcp_tool(self, mcp_tool):
+            async def _call(**args: Any) -> Any:
+                # print(f"Client - Calling: {mcp_tool.name}")
+                result = await self_session.call_tool(mcp_tool.name, args)
+                # print(f"Client - Called: {mcp_tool.name}; Result: {result}")
+                return result.content[0].text
+
+            tool = Tool(_call)
             tool.name = mcp_tool.name
             tool.schema = {
                 "type": "function",
@@ -59,35 +64,6 @@ class MCPClient:
 
         for tool in tools:
             self.llm.register_tool(tool)
-
-    async def chat_async(self, prompt):
-        def mcp_tool_func(name: str):
-            async def _call(**args):
-                result = await self.session.call_tool(name, args)
-                print(f"Called: {name}; Result: {result}")
-                return result.content[0].text
-
-            return _call
-
-        async def _invoke_mcp_tools_async(self) -> Turn | None:
-            turn = self.get_last_turn()
-            if turn is None:
-                return None
-
-            results: list[ContentToolResult] = []
-            for x in turn.contents:
-                if isinstance(x, ContentToolRequest):
-                    results.append(
-                        await self._invoke_tool_async(mcp_tool_func(x.name), x.arguments, x.id)
-                    )
-
-            if not results:
-                return None
-
-            return Turn("user", results)
-
-        self.llm._invoke_tools_async = partial(_invoke_mcp_tools_async, self.llm)
-        await self.llm.chat_async(prompt, echo="text")
 
     async def cleanup(self):
         """Clean up resources."""
