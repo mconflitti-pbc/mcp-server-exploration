@@ -197,13 +197,16 @@ def map_body_params(body_params):
     return body
 
 
-async def make_request(operation, api_params):
+async def make_request(base_url: str, operation, api_params):
     """
     Makes an HTTP request using httpx with the given operation and parameters.
 
-    Args:
-        operation: A dictionary containing the HTTP method and route.
-        api_params: A dictionary containing path, query, and body parameters.
+    Arguments
+    ---------
+    operation
+        A dictionary containing the HTTP method and route.
+    api_params
+        A dictionary containing path, query, and body parameters.
 
     Returns
     -------
@@ -215,8 +218,8 @@ async def make_request(operation, api_params):
     query_params = map_query_params(api_params["query"])
     body_params = map_body_params(api_params["body"])
 
-    # Construct the full URL
-    base_url = urllib.parse.urljoin(CONNECT_SERVER, "__api__")
+    # # Construct the full URL
+    # base_url = urllib.parse.urljoin(CONNECT_SERVER, "__api__")
 
     # print(base_url, route)
     # print(query_params)
@@ -267,7 +270,8 @@ async def handle_operation(operations: SupportedOperations, name: str, arguments
         operation["definition"].get("parameters", []),
     )
 
-    result = await make_request(operation, api_params)
+    base_url = urllib.parse.urljoin(CONNECT_SERVER, "__api__")
+    result = await make_request(base_url, operation, api_params)
     print("Received Result")
     # print("Received Result: {result}")
     return [types.TextContent(text=result, type="text")]
