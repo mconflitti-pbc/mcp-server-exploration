@@ -35,7 +35,7 @@ htmltools = ["py.typed"]
 ex-fastapi = ["fastapi==0.115.6"]
 ex-shiny = [
     # "shiny>=1.2.1",
-    "shiny@git+https://github.com/posit-dev/shiny@chat_normalize_anthropic",
+    "shiny@git+https://github.com/posit-dev/py-shiny@chat_normalize_anthropic",
     "requests>=1.2.1",
 ]
 lint = ["ruff>=0.8.4", "pyright>=1.1.391"]
