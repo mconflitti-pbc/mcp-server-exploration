@@ -536,12 +536,12 @@ dev = [
     { name = "requests", specifier = ">=1.2.1" },
     { name = "rsconnect-python", specifier = ">=1.25.1" },
     { name = "ruff", specifier = ">=0.8.4" },
-    { name = "shiny", specifier = ">=1.2.1" },
+    { name = "shiny", git = "https://github.com/posit-dev/py-shiny?rev=chat_normalize_anthropic" },
 ]
 ex-fastapi = [{ name = "fastapi", specifier = "==0.115.6" }]
 ex-shiny = [
     { name = "requests", specifier = ">=1.2.1" },
-    { name = "shiny", specifier = ">=1.2.1" },
+    { name = "shiny", git = "https://github.com/posit-dev/py-shiny?rev=chat_normalize_anthropic" },
 ]
 lint = [
     { name = "pyright", specifier = ">=1.1.391" },
@@ -879,8 +879,8 @@ wheels = [
 
 [[package]]
 name = "shiny"
-version = "1.2.1"
-source = { registry = "https://pypi.org/simple" }
+version = "1.2.2.dev16"
+source = { git = "https://github.com/posit-dev/py-shiny?rev=chat_normalize_anthropic#c08df9cdbe3939abc8d97dec4b1e5faeb8da3095" }
 dependencies = [
     { name = "appdirs" },
     { name = "asgiref" },
@@ -901,10 +901,6 @@ dependencies = [
     { name = "uvicorn", marker = "sys_platform != 'emscripten'" },
     { name = "watchfiles", marker = "sys_platform != 'emscripten'" },
     { name = "websockets" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/0a/1e/7fb6b23a09f85b2d7fa81ae9b0992dd817e8fcaf7218c86a4641ab6d896d/shiny-1.2.1.tar.gz", hash = "sha256:69a4db338710d87fad0ae50e04b2d70f6b7183edb846db4fa90cd7456091feee", size = 5205474 }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/23/70/e692ba2b6af84017c96e6856f87be596e341bf06ef6774fcd0b4a32856fa/shiny-1.2.1-py3-none-any.whl", hash = "sha256:b5778ed5370066d33a10e7fbaaef19e9691ec4c4f24e2f59137b8cac92f064f9", size = 4306265 },
 ]
 
 [[package]]

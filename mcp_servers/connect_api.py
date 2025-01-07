@@ -243,7 +243,7 @@ async def handle_operation(operations: SupportedOperations, name: str, arguments
         return [
             types.TextContent(
                 text=f"Operation '{name}' is not supported.",
-                contentType="text/plain",
+                type="text",
             )
         ]
 
@@ -255,9 +255,10 @@ async def handle_operation(operations: SupportedOperations, name: str, arguments
     )
 
     result = await make_request(operation, api_params)
-    print("Received Result")
-    # print("Received Result: {result}")
-    return [types.TextContent(text=result, contentType="text/plain")]
+    # print("Received Result")
+    # print(f"Received Result: {result}")
+    print("Received Result", result)
+    return [types.TextContent(text=result, type="text")]
 
 
 @server.list_tools()
