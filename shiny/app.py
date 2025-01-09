@@ -12,9 +12,7 @@ import htmltools
 import requests
 
 from openapi_mcp.chatlas import SwaggerTool
-from openapi_mcp.connect_api import (
-    map_operations_to_tools,
-)
+from openapi_mcp.connect_api import map_operations_to_tools
 from openapi_mcp.swagger import (
     expand_all_references,
     transform_swagger_to_operation_dict,
@@ -32,7 +30,7 @@ chat = chatlas.ChatBedrockAnthropic(model=aws_model, aws_region=aws_region)
 
 # Set some Shiny page options
 ui.page_opts(
-    title="Hello Anthropic Claude Chat",
+    window_title="OpenAPI Chat",
     fillable=True,
     fillable_mobile=True,
 )

@@ -83,7 +83,7 @@ def map_swagger_params_to_input_schema(params):
     return schema
 
 
-def map_operations_to_tools(operations: SupportedOperations):
+def map_operations_to_tools(operations: SupportedOperations) -> list[types.Tool]:
     return [
         types.Tool(
             name=operation["name"],
