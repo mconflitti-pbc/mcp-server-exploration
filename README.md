@@ -68,17 +68,17 @@ make shiny
 
 ![Screenshot of Star Wars shiny app demo](shiny/demo.png)
 
-## Tasks
-
-- [x] Read swagger file
-- [x] Expand swagger file reference objects: `doc = expand_swagger(doc)
-- [x] Create bridge between swagger file and tool call: `
-- [x] Register tool calls with chatlas
-- [x] Make function to process generic swagger file: `operations = transform_swagger_to_operation_dict(doc)`
-- [x] Move all of `mcp_servers` into `openapi_mcp` as methods
-- [x] Make shiny chat app
-  - [x] Accepts a plumber API URL
-  - [x] Swagger docs in the main page
-  - [x] Leverage new function
-- [x] Make into package?
-  - [x] Export functions that accept a swagger information and return tool calls (see usage above)
+<!-- ## Tasks -->
+<!--  -->
+<!-- - [x] Read swagger file -->
+<!-- - [x] Expand swagger file reference objects: `doc = expand_swagger(doc) -->
+<!-- - [x] Create bridge between swagger file and tool call: ` -->
+<!-- - [x] Register tool calls with chatlas -->
+<!-- - [x] Make function to process generic swagger file: `operations = transform_swagger_to_operation_dict(doc)` -->
+<!-- - [x] Move all of `mcp_servers` into `openapi_mcp` as methods -->
+<!-- - [x] Make shiny chat app -->
+  <!-- - [x] Accepts a plumber API URL -->
+  <!-- - [x] Swagger docs in the main page -->
+  <!-- - [x] Leverage new function -->
+<!-- - [x] Make into package? -->
+  <!-- - [x] Export functions that accept a swagger information and return tool calls (see usage above) -->
