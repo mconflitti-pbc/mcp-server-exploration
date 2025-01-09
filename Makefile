@@ -2,7 +2,7 @@ include vars.mk
 
 .DEFAULT_GOAL := all
 
-.PHONY: clean default dev ensure-uv fmt lint test help shiny ex-api
+.PHONY: clean default dev ensure-uv fmt lint test help shiny ex-api ex-starwars
 
 all: dev lint
 
@@ -49,6 +49,8 @@ test: dev
 
 ex-api: # dev
 	$(UV) run --group ex-fastapi uvicorn ex_api.main:app --reload
+ex-starwars: # dev
+	$(UV) run --group ex-fastapi uvicorn ex_starwars.main:app --reload
 shiny: # dev
 	$(UV) run --group ex-fastapi python -m shiny run --port 56025 --reload --autoreload-port 56026 shiny/app.py
 
