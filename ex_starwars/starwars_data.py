@@ -13,7 +13,7 @@ if not os.path.exists(csv_file):
 
 starwars_data = pl.read_csv(
     csv_file,
-    dtypes={"height": pl.Int32, "mass": pl.Float32, "birth_year": pl.Float32},
+    dtypes={"height": pl.Int32, "mass": pl.Float32, "birth_year": pl.Float32},  # pyright: ignore[reportCallIssue]
     null_values=["NA"],
 )
 

@@ -1,5 +1,6 @@
 import os
 import urllib.parse
+from typing import Sequence
 
 import httpx
 import mcp.types as types
@@ -9,7 +10,7 @@ from mcp.server.sse import SseServerTransport
 from starlette.applications import Starlette
 from starlette.routing import Route
 
-from mcp_servers.helpers.swagger import (
+from openapi_mcp.swagger import (
     OperationDef,
     expand_swagger,
     transform_swagger_to_operation_dict,
@@ -295,7 +296,7 @@ async def handle_list_tools() -> list[types.Tool]:
 @server.call_tool()
 async def handle_call_tool(
     name: str, arguments: dict | None
-) -> list[types.TextContent | types.ImageContent | types.EmbeddedResource]:
+) -> Sequence[types.TextContent | types.ImageContent | types.EmbeddedResource]:
     """
     Handle tool execution requests.
 

@@ -5,6 +5,8 @@ from pathlib import Path
 import yaml
 from typing_extensions import Any, NotRequired, TypedDict, TypeVar
 
+T = TypeVar("T")
+
 
 def find_value(root, path):
     """
@@ -28,7 +30,9 @@ def find_value(root, path):
     return parent
 
 
-def expand_refs(document, obj):
+def expand_refs(
+    document, obj
+) -> Any:  # Use `Any` for return type to hack around typing requirement
     """
     Expands `ref`s in the given object.
 
@@ -131,6 +135,8 @@ def expand_all_references(document: SwaggerDocument) -> SwaggerDocument:
     if "paths" in ret_document:
         for _path, operations in ret_document["paths"].items():
             for _method, operation in operations.items():
+                if not isinstance(operation, dict):
+                    continue
                 # Expand refs in parameters
                 if "parameters" in operation:
                     operation["parameters"] = expand_refs(ret_document, operation["parameters"])
@@ -158,9 +164,6 @@ def expand_all_references(document: SwaggerDocument) -> SwaggerDocument:
     return ret_document
 
 
-T = TypeVar("T")
-
-
 def clean_whitespace(obj: T) -> T:
     """
     Format white space.
@@ -177,11 +180,11 @@ def clean_whitespace(obj: T) -> T:
         The cleaned object.
     """
     if isinstance(obj, str):
-        return re.sub(r"\s+", " ", obj).strip()
+        return re.sub(r"\s+", " ", obj).strip()  # pyright: ignore[reportReturnType]
     elif isinstance(obj, list):
-        return [clean_whitespace(item) for item in obj]
+        return [clean_whitespace(item) for item in obj]  # pyright: ignore[reportReturnType]
     elif isinstance(obj, dict):
-        return {key: clean_whitespace(value) for key, value in obj.items()}
+        return {key: clean_whitespace(value) for key, value in obj.items()}  # pyright: ignore[reportReturnType]
     else:
         return obj
 
@@ -244,6 +247,8 @@ def transform_swagger_to_operation_dict(swagger_dict: SwaggerDocument) -> dict[s
     if "paths" in swagger_dict:
         for route, operations in swagger_dict["paths"].items():
             for method, operation in operations.items():
+                if not isinstance(operation, dict):
+                    continue
                 if "operationId" in operation:
                     operation_id = operation["operationId"]
                     tags = operation["tags"] if "tags" in operation else []

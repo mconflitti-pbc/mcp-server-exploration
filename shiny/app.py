@@ -6,32 +6,23 @@
 # ------------------------------------------------------------------------------------
 import asyncio
 import os
-from typing import Any
 
 import chatlas
 import htmltools
-import mcp.types as mcp_types
 import requests
-from typing_extensions import TYPE_CHECKING
 
-# import anthropic
-# from anthropic import AnthropicBedrock
-from mcp_servers.helpers.swagger import (
-    OperationDef,
+from openapi_mcp.chatlas import SwaggerTool
+from openapi_mcp.connect_api import (
+    map_operations_to_tools,
+)
+from openapi_mcp.swagger import (
     expand_all_references,
     transform_swagger_to_operation_dict,
 )
-from openapi_mcp.connect_api import (
-    make_request,
-    map_arguments_to_api_params,
-    map_operations_to_tools,
-)
 from shiny import reactive, req
 from shiny import ui as core_ui
-from shiny.express import input, render, ui
+from shiny.express import input, render, ui  # noqa: A004
 
-if TYPE_CHECKING:
-    from openai.types.chat import ChatCompletionToolParam
 STREAM_CHAT = True
 
 
@@ -61,65 +52,6 @@ async def _():
         await chat_ui.append_message(str(chat.chat(user_input)))
 
 
-# @reactive.calc
-# def anthropic_tools():
-#     return [
-#         {
-#             "input_schema": tool.inputSchema,
-#             "name": tool.name,
-#             "description": tool.description,
-#         }
-#         for tool in openapi_tools()
-#     ]
-
-
-class RawChatlasTool(chatlas.Tool):
-    # TODO-chatlas: Add this method to the chatlas.Chat class
-    @staticmethod
-    def reset_tools(chat: chatlas.Chat):
-        chat._tools = {}
-        return
-
-    # TODO-chatlas: Add this method to the chatlas.Chat class
-    @staticmethod
-    def register_tool(chat: chatlas.Chat, tool: "RawChatlasTool"):
-        chat._tools[tool.name] = tool
-        return
-
-    def __init__(self, *, base_url: str, operation: OperationDef):
-        operation_name = operation["name"]
-
-        operation_description = operation["definition"]["description"]
-        tool = map_operations_to_tools({operation_name: operation})[0]
-        operation_input_schema = tool.inputSchema
-
-        async def call_api(**kwargs: Any):
-            # print("\n\nCalling tool", self.name, "with args:", kwargs)
-            api_params = map_arguments_to_api_params(
-                kwargs,
-                operation["definition"].get("parameters", []),
-            )
-            result = await make_request(base_url, operation, api_params)
-            return [mcp_types.TextContent(text=result, type="text")]
-
-        super().__init__(call_api, model=None)
-
-        # Now override the name, description, and input_schema
-        self.name = operation_name
-        self.description = operation_description
-        self.schema: ChatCompletionToolParam = {
-            "type": "function",
-            "function": {
-                "name": operation_name,
-                "description": operation_description,
-                "parameters": operation_input_schema,
-            },
-        }
-        # RawChatlasTool class variables
-        self._operation = operation
-        self._tool = tool
-
-
 @reactive.effect
 def _():
     api_operations = openapi_operations()
@@ -129,11 +61,11 @@ def _():
 
     api_url = openapi_url.get()
 
-    RawChatlasTool.reset_tools(chat)
+    SwaggerTool.reset_tools(chat)
     for operation in api_operations.values():
-        RawChatlasTool.register_tool(
+        SwaggerTool.register_tool(
             chat,
-            RawChatlasTool(
+            SwaggerTool(
                 base_url=api_url,
                 operation=operation,
             ),
@@ -227,7 +159,11 @@ def openapi_json():
 @reactive.calc
 def openapi_operations():
     ui.notification_show("Transforming OpenAPI schema to operations", id="transforming_openapi")
-    document = expand_all_references(openapi_json())
+    json_obj = openapi_json()
+    if json_obj is None:
+        req(json_obj)
+        raise ValueError("This should not be reached")
+    document = expand_all_references(json_obj)
     operations = transform_swagger_to_operation_dict(document)
     return operations
 
@@ -259,8 +195,7 @@ async def _():
 
 
 # Helpful debugging setup for interactive / non-deployed mode
-# if not os.environ.get("CONNECT_CONTENT_GUID", ""):
-if False:
+if not os.environ.get("CONNECT_CONTENT_GUID", ""):
     ui.HTML("""
 <script>
     function click_submit() {

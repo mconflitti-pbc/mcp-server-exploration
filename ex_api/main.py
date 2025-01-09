@@ -1,3 +1,5 @@
+from typing import Optional
+
 from fastapi import FastAPI
 
 app = FastAPI()
@@ -10,6 +12,6 @@ def read_root():
 
 
 @app.get("/items/{item_id}")
-def read_item(item_id: int, query_param: str = None):
+def read_item(item_id: int, query_param: Optional[str] = None):
     """Endpoint to retrieve item details."""
     return {"item_id": item_id, "query_param": query_param}

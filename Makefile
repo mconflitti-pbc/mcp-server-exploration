@@ -2,14 +2,14 @@ include vars.mk
 
 .DEFAULT_GOAL := all
 
-.PHONY: clean default dev ensure-uv fmt lint test help shiny ex-api ex-starwars
+.PHONY: clean default dev ensure-uv fmt lint test help shiny ex-api ex-starwars client server
 
 all: dev lint
 
-client: # dev
+client:
 	$(UV) run python app.py
-server: # dev
-	$(UV) run python -m mcp_servers.connect_api
+server:
+	$(UV) run python -m src.openapi_mcp.connect_api
 
 clean:
 	rm -rf .pytest_cache .ruff_cache *.egg-info

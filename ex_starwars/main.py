@@ -1,7 +1,6 @@
 from dataclasses import dataclass
 
 from fastapi import FastAPI
-from typing_extensions import Literal
 
 from .starwars_data import starwars_data, starwars_relationships
 
@@ -66,7 +65,7 @@ def get_names() -> list[str]:
 
 
 @app.get("/character")
-def get_character(name: str) -> Entity:
+def get_character(name: str) -> Entity | None:
     """
     Endpoint to retrieve character details.
 
@@ -100,7 +99,7 @@ def get_character(name: str) -> Entity:
 class Relationship:
     parent: str
     child: str
-    relationship: Literal["light", "dark", "blood"]
+    relationship: str  # Literal["light", "dark", "blood"]
 
 
 @app.get("/relationship")

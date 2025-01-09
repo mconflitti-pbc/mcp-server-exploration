@@ -1,13 +1,12 @@
 from contextlib import AsyncExitStack
-from functools import partial
 from typing import Any, Optional
 
+import chatlas
 from chatlas import Chat
-from chatlas._content import ContentToolRequest, ContentToolResult
-from chatlas._tools import Tool
-from chatlas._turn import Turn
 from mcp import ClientSession
 from mcp.client.sse import sse_client
+
+from openapi_mcp.chatlas import RawChatlasTool
 
 
 class MCPClient:
@@ -31,6 +30,7 @@ class MCPClient:
         self.session = await self.exit_stack.enter_async_context(
             ClientSession(self.sse, self.write)
         )
+        assert isinstance(self.session, ClientSession)
 
         await self.session.initialize()
 
@@ -41,29 +41,26 @@ class MCPClient:
 
         self_session = self.session
 
-        def register_mcp_tool(self, mcp_tool):
+        def register_mcp_tool(chat: chatlas.Chat, mcp_tool):
             async def _call(**args: Any) -> Any:
                 # print(f"Client - Calling: {mcp_tool.name}")
                 result = await self_session.call_tool(mcp_tool.name, args)
                 # print(f"Client - Called: {mcp_tool.name}; Result: {result}")
-                return result.content[0].text
+                if result.content[0].type == "text":
+                    return result.content[0].text
+                else:
+                    raise RuntimeError(f"Unexpected content type: {result.content[0].type}")
 
-            tool = Tool(_call)
-            tool.name = mcp_tool.name
-            tool.schema = {
-                "type": "function",
-                "function": {
-                    "name": mcp_tool.name,
-                    "description": mcp_tool.description,
-                    "parameters": mcp_tool.inputSchema,
-                },
-            }
-            self._tools[tool.name] = tool
-
-        self.llm.register_tool = partial(register_mcp_tool, self.llm)
+            tool = RawChatlasTool(
+                name=mcp_tool.name,
+                fn=_call,
+                description=mcp_tool.description,
+                input_schema=mcp_tool.inputSchema,
+            )
+            RawChatlasTool.register_tool(chat, tool)
 
         for tool in tools:
-            self.llm.register_tool(tool)
+            register_mcp_tool(self.llm, tool)
 
     async def cleanup(self):
         """Clean up resources."""
