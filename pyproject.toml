@@ -12,7 +12,7 @@ dependencies = [
     "anthropic[bedrock]>=0.42.0",
     # "chatlas>=0.3.1",
     # "chatlas@git+https://github.com/posit-dev/chatlas@main",
-    "chatlas@git+https://github.com/posit-dev/chatlas@schloerke-patch-1",
+    "chatlas@git+https://github.com/posit-dev/chatlas@main",
     "jsonref>=1.1.0",
     "mcp>=1.2.0",
     "openai>=1.58.0",
@@ -20,6 +20,7 @@ dependencies = [
     # "starlette>=0.42.0",
     "starlette>=0.40.0,<0.42.0",
     "uvicorn>=0.34.0",
+    "polars>=1.19.0",
 ]
 
 [tool.setuptools]
@@ -32,7 +33,7 @@ version = { attr = "openapi_mcp.__version__" }
 htmltools = ["py.typed"]
 
 [dependency-groups]
-ex-fastapi = ["fastapi==0.115.6"]
+ex-fastapi = ["fastapi==0.115.6", "polars>=1.19.0"]
 ex-shiny = [
     # "shiny>=1.2.1",
     "shiny@git+https://github.com/posit-dev/py-shiny@chat_normalize_anthropic",
