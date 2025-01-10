@@ -148,6 +148,12 @@ def openapi_json():
     if response.status_code != 200:
         print("Failed to fetch OpenAPI schema from", url)
         print(response)
+        ui.notification_show(
+            f"Failed to get OpenAPI\n{response.text}",
+            id="fetching_openapi",
+            duration=None,
+            type="error",
+        )
         req(False)
         return
     result = response.json()
@@ -169,6 +175,24 @@ def openapi_operations():
 @reactive.calc
 def openapi_tools():
     return map_operations_to_tools(openapi_operations())
+
+
+@reactive.effect
+def _():
+    req(openapi_operations())
+    print("OpenAPI operations:", openapi_operations())
+
+
+@reactive.effect
+def _():
+    req(openapi_tools())
+    print("OpenAPI tools:", openapi_tools())
+
+
+@reactive.effect
+def _():
+    req(openapi_json())
+    print("OpenAPI JSON:", openapi_json())
 
 
 @reactive.effect
