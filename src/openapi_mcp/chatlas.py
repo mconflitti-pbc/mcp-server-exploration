@@ -1,15 +1,16 @@
+import os
 from typing import Any, Callable
 
 import chatlas
 import mcp.types as mcp_types
 from typing_extensions import TYPE_CHECKING
 
-from openapi_mcp.connect_api import (
+from .map import (
     make_request,
     map_arguments_to_api_params,
     map_operations_to_tools,
 )
-from openapi_mcp.swagger import (
+from .swagger import (
     OperationDef,
 )
 
@@ -64,7 +65,10 @@ class SwaggerTool(RawChatlasTool):
                 kwargs,
                 operation["definition"].get("parameters", []),
             )
-            result = await make_request(base_url, operation, api_params)
+            CONNECT_API_KEY = os.environ.get("CONNECT_API_KEY", "")
+            result = await make_request(
+                base_url, operation, api_params, CONNECT_API_KEY=CONNECT_API_KEY
+            )
             return [mcp_types.TextContent(text=result, type="text")]
 
         super().__init__(

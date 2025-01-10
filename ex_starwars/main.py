@@ -1,8 +1,7 @@
 from dataclasses import dataclass
 
 from fastapi import FastAPI
-
-from .starwars_data import starwars_data, starwars_relationships
+from starwars_data import starwars_data, starwars_relationships
 
 app = FastAPI()
 

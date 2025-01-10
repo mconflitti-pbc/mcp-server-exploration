@@ -12,7 +12,7 @@ import htmltools
 import requests
 
 from openapi_mcp.chatlas import SwaggerTool
-from openapi_mcp.connect_api import map_operations_to_tools
+from openapi_mcp.map import map_operations_to_tools
 from openapi_mcp.swagger import (
     expand_all_references,
     transform_swagger_to_operation_dict,
