@@ -1,7 +1,13 @@
+import os
 from dataclasses import dataclass
 
 from fastapi import FastAPI
-from starwars_data import starwars_data, starwars_relationships
+
+IS_LOCAL = not os.environ.get("CONNECT_CONTENT_GUID", "")
+if IS_LOCAL:
+    from .starwars_data import starwars_data, starwars_relationships
+else:
+    from starwars_data import starwars_data, starwars_relationships
 
 app = FastAPI()
 

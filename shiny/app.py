@@ -22,7 +22,12 @@ from shiny import ui as core_ui
 from shiny.express import input, render, ui  # noqa: A004
 
 STREAM_CHAT = True
-
+IS_LOCAL = not os.environ.get("CONNECT_CONTENT_GUID", "")
+DEFAULT_OPENAPI_URL = (
+    "http://127.0.0.1:8000/"
+    if IS_LOCAL
+    else "https://rsc.radixu.com/content/81bc0bf6-d1f3-41b5-a1b4-d1ee7092f36f/"
+)
 
 aws_model = os.getenv("AWS_MODEL", "us.anthropic.claude-3-5-sonnet-20241022-v2:0")
 aws_region = os.getenv("AWS_REGION", "us-east-1")
@@ -118,7 +123,7 @@ modal = ui.modal(
     ui.input_text(
         "api_url",
         "Enter the URL of the Swagger file:",
-        placeholder="http://127.0.0.1:8000/",
+        placeholder=DEFAULT_OPENAPI_URL,
     ),
     id="api_url_modal",
     title="API URL",
@@ -205,7 +210,7 @@ async def _():
         print("Be sure to enter a string. Received:", input_api_url)
         return
     if input_api_url == "":
-        input_api_url = "http://127.0.0.1:8000/"
+        input_api_url = DEFAULT_OPENAPI_URL
 
     if input_api_url.endswith((".json", ".yaml")):
         raise ValueError("Please enter the URL of the Swagger file, not the file itself.")
@@ -217,7 +222,7 @@ async def _():
 
 
 # Helpful debugging setup for interactive / non-deployed mode
-if not os.environ.get("CONNECT_CONTENT_GUID", ""):
+if IS_LOCAL:
     ui.HTML("""
 <script>
     function click_submit() {
