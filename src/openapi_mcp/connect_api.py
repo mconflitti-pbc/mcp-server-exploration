@@ -8,15 +8,15 @@ from mcp.server.sse import SseServerTransport
 from starlette.applications import Starlette
 from starlette.routing import Route
 
-from .map import handle_operation, map_operations_to_tools
+from .map import (
+    SupportedOperations,
+    handle_operation,
+    map_operations_to_tools,
+)
 from .swagger import (
     expand_swagger,
     transform_swagger_to_operation_dict,
 )
-
-if TYPE_CHECKING:
-    from .map import SupportedOperations  # noqa: TC004
-
 
 CONNECT_SERVER = os.environ.get("CONNECT_SERVER", "http://localhost:3939")
 CONNECT_API_KEY = os.environ.get("CONNECT_API_KEY", "")

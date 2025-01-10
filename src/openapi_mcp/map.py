@@ -1,15 +1,13 @@
 import urllib.parse
-from typing import TYPE_CHECKING
 
 import httpx
 import mcp.types as types
 
-if TYPE_CHECKING:
-    from .swagger import (
-        OperationDef,
-    )
+from .swagger import (
+    OperationDef,
+)
 
-    SupportedOperations = dict[str, OperationDef]
+SupportedOperations = dict[str, OperationDef]
 
 
 def map_swagger_params_to_input_schema(params):
