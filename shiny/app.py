@@ -122,11 +122,11 @@ def _openapi_frame():
 modal = ui.modal(
     ui.input_text(
         "api_url",
-        "Enter the URL of the Swagger file:",
+        None,
         placeholder=DEFAULT_OPENAPI_URL,
     ),
     id="api_url_modal",
-    title="API URL",
+    title="Enter the URL for a public Plumber or FastAPI API:",
     easy_close=False,
     footer=ui.input_action_button("api_url_submit", "Save"),
 )

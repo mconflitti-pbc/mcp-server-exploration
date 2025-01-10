@@ -63,3 +63,9 @@ help:
 	@echo "  fmt            Format the code"
 	@echo "  lint           Lint the code"
 	@echo "  test           Run unit tests"
+
+
+_barret_deploy_api:
+	cd ex_starwars && rsconnect deploy fastapi . -v
+_barret_deploy_shiny:
+	cd shiny && CONNECT_SERVER="$$POSIT_CONNECT_SERVER" rsconnect deploy shiny . -v

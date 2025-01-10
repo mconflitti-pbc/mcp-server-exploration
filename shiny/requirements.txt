@@ -31,7 +31,7 @@ mdurl==0.1.2
 narwhals==1.21.1
 nodeenv==1.9.1
 openai==1.59.5
-openapi-mcp @ git+https://github.com/mconflitti-pbc/mcp-server-exploration@871386f
+openapi-mcp @ git+https://github.com/mconflitti-pbc/mcp-server-exploration@1d0816e
 orjson==3.10.14
 packaging==24.2
 pip==24.3.1
