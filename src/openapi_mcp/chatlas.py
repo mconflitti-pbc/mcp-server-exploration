@@ -67,7 +67,10 @@ class SwaggerTool(RawChatlasTool):
             )
             CONNECT_API_KEY = os.environ.get("CONNECT_API_KEY", "")
             result = await make_request(
-                base_url, operation, api_params, CONNECT_API_KEY=CONNECT_API_KEY
+                base_url,
+                operation,
+                api_params,
+                CONNECT_API_KEY="",
             )
             return [mcp_types.TextContent(text=result, type="text")]
 

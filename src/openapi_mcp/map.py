@@ -161,7 +161,7 @@ def map_body_params(body_params):
     return body
 
 
-async def make_request(base_url: str, operation, api_params, *, CONNECT_API_KEY):
+async def make_request(base_url: str, operation, api_params, *, CONNECT_API_KEY: str):
     """
     Makes an HTTP request using httpx with the given operation and parameters.
 
@@ -194,7 +194,7 @@ async def make_request(base_url: str, operation, api_params, *, CONNECT_API_KEY)
         response = await client.request(
             method=operation["method"],
             url=route,
-            headers={"Authorization": f"Key {CONNECT_API_KEY}"},
+            headers={"Authorization": f"Key {CONNECT_API_KEY}"} if CONNECT_API_KEY else None,
             params=query_params,
             json=body_params,
         )
